@@ -1,104 +1,109 @@
 package org_example;
+
 import org_example.domain.Client;
 import org_example.domain.Medic;
 import org_example.domain.Programare;
 import org_example.service.ClientService;
-import org_example.service.DatabaseService;
 import org_example.service.MedicService;
 import org_example.service.ProgramareService;
-import org_example.validator.ClientValidator;
-import org_example.validator.MedicValidator;
-import org_example.database.DatabaseConfiguration;
 import org_example.database.SetupDataUsingStatement;
-import java.util.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class Main {
     public static void main(String[] args) {
         SetupDataUsingStatement setupData = new SetupDataUsingStatement();
         setupData.createTables();
 
-        DatabaseService<Client> clientService = DatabaseService.getInstance();
-        clientService.create("INSERT INTO client (nume, adresa, email, telefon) VALUES ('Clientunu', 'Adresa1', 'client1@example.com', '0734587890')");
-        clientService.create("INSERT INTO client (nume, adresa, email, telefon) VALUES ('Clientdoi', 'Adresa2', 'client2@example.com', '0787674321')");
+        ClientService clientService = new ClientService();
+        MedicService medicService = new MedicService();
+        ProgramareService programareService = new ProgramareService(10);
+
+        clearTables(clientService, medicService, programareService);
+
+        clientService.addCl(new Client(1, "Clientunu", "Adresa1", "client1@example.com", "0734587890"));
+        clientService.addCl(new Client(2, "Clientdoi", "Adresa2", "client2@example.com", "0787674321"));
 
         System.out.println("Clienți existenți:");
-        List<Client> clienti = clientService.read("SELECT * FROM client", resultSet -> {
-            int id = resultSet.getInt("id");
-            String nume = resultSet.getString("nume");
-            String adresa = resultSet.getString("adresa");
-            String email = resultSet.getString("email");
-            String telefon = resultSet.getString("telefon");
-            return new Client(id, nume, adresa, email, telefon);
-        });
-
+        List<Client> clienti = clientService.getAllClients();
         for (Client client : clienti) {
             System.out.println(client);
         }
 
-        clientService.update("UPDATE client SET telefon = '0734567999' WHERE id = 1");
+        Client updatedClient = new Client(1, "Clientunu", "Adresa1", "client1@example.com", "0734567999");
+        clientService.updateClient(updatedClient);
 
         System.out.println("\nClienți după actualizare:");
-        List<Client> updatedClienti = clientService.read("SELECT * FROM client", resultSet -> {
-            int id = resultSet.getInt("id");
-            String nume = resultSet.getString("nume");
-            String adresa = resultSet.getString("adresa");
-            String email = resultSet.getString("email");
-            String telefon = resultSet.getString("telefon");
-            return new Client(id, nume, adresa, email, telefon);
-        });
+        List<Client> updatedClienti = clientService.getAllClients();
         for (Client client : updatedClienti) {
             System.out.println(client);
         }
 
-        clientService.delete("DELETE FROM client WHERE id = 2");
+        clientService.deleteClient(2);
 
         System.out.println("\nClienți după ștergere:");
-        List<Client> remainingClienti = clientService.read("SELECT * FROM client", resultSet -> {
-            int id = resultSet.getInt("id");
-            String nume = resultSet.getString("nume");
-            String adresa = resultSet.getString("adresa");
-            String email = resultSet.getString("email");
-            String telefon = resultSet.getString("telefon");
-            return new Client(id, nume, adresa, email, telefon);
-        });
-
+        List<Client> remainingClienti = clientService.getAllClients();
         for (Client client : remainingClienti) {
             System.out.println(client);
         }
 
-        DatabaseService<Medic> medicService = DatabaseService.getInstance();
-        medicService.create("INSERT INTO medic (nume, specialitate, orar) VALUES ('Marin', 'Specializare1', '12:00-18:00')");
-        medicService.create("INSERT INTO medic (nume, specialitate, orar) VALUES ('Ana', 'Specializare2', '8:00-16:00')");
+        medicService.addMed(new Medic(1, "Marin", "Specializare1", "12:00-18:00"));
+        medicService.addMed(new Medic(2, "Ana", "Specializare2", "8:00-16:00"));
 
         System.out.println("\nMedici existenți:");
-        List<Medic> medici = medicService.read("SELECT * FROM medic", resultSet -> {
-            int id = resultSet.getInt("id");
-            String nume = resultSet.getString("nume");
-            String specialitate = resultSet.getString("specialitate");
-            String orar = resultSet.getString("orar");
-            return new Medic(id, nume, specialitate, orar);
-        });
-
+        Set<Medic> medici = medicService.getAllMedici();
         for (Medic medic : medici) {
             System.out.println(medic);
         }
 
-        DatabaseService<Programare> programareService = DatabaseService.getInstance();
-        programareService.create("INSERT INTO programare (id_client, id_medic, data, motiv) VALUES (1, 1, '2024-05-26 10:00:00', 'Verificare operatie glezna /30zile')");
+        Medic updatedMedic = new Medic(1, "Marin", "Specializare1", "14:00-20:00");
+        medicService.updateMedic(updatedMedic);
+
+        System.out.println("\nMedici după actualizare:");
+        Set<Medic> updatedMedici = medicService.getAllMedici();
+        for (Medic medic : updatedMedici) {
+            System.out.println(medic);
+        }
+
+        medicService.deleteMedic(2);
+
+        System.out.println("\nMedici după ștergere:");
+        Set<Medic> remainingMedici = medicService.getAllMedici();
+        for (Medic medic : remainingMedici) {
+            System.out.println(medic);
+        }
+
+        programareService.addProg(new Programare(1, 1, 1, new Date(), "Verificare operatie glezna /30zile"));
 
         System.out.println("\nProgramări existente:");
-        List<Programare> programari = programareService.read("SELECT * FROM programare", resultSet -> {
-            int id = resultSet.getInt("id");
-            int idClient = resultSet.getInt("id_client");
-            int idMedic = resultSet.getInt("id_medic");
-            Date data = resultSet.getDate("data");
-            String motiv = resultSet.getString("motiv");
-            return new Programare(id, idClient, idMedic, data, motiv);
-        });
-
+        List<Programare> programari = programareService.getAllProgramari();
         for (Programare programare : programari) {
             System.out.println(programare);
         }
+
+        Programare updatedProgramare = new Programare(1, 1, 1, new Date(), "Control post-operator");
+        programareService.updateProgramare(updatedProgramare);
+
+        System.out.println("\nProgramări după actualizare:");
+        List<Programare> updatedProgramari = programareService.getAllProgramari();
+        for (Programare programare : updatedProgramari) {
+            System.out.println(programare);
+        }
+
+        programareService.deleteProgramare(1);
+
+        System.out.println("\nProgramări după ștergere:");
+        List<Programare> remainingProgramari = programareService.getAllProgramari();
+        for (Programare programare : remainingProgramari) {
+            System.out.println(programare);
+        }
+    }
+
+    private static void clearTables(ClientService clientService, MedicService medicService, ProgramareService programareService) {
+        clientService.deleteAllClients();
+        medicService.deleteAllMedici();
+        programareService.deleteAllProgramari();
     }
 }
-
