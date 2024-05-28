@@ -2,6 +2,7 @@ package org_example.service;
 
 import org_example.domain.Client;
 import org_example.database.DatabaseConfiguration;
+import org_example.validator.ClientValidator;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,26 +11,32 @@ import java.util.List;
 public class ClientService {
 
     public List<Client> clienti;
+    private ClientValidator validator;
 
     public ClientService() {
         this.clienti = new ArrayList<>();
+        this.validator = new ClientValidator();
     }
 
     public void addCl(Client cl) {
-        clienti.add(cl);
-        try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
-            String query = "INSERT INTO client (id, nume, adresa, email, telefon) VALUES (?, ?, ?, ?, ?)";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, cl.getId());
-                statement.setString(2, cl.getNume());
-                statement.setString(3, cl.getAdresa());
-                statement.setString(4, cl.getEmail());
-                statement.setString(5, cl.getTelefon());
-                statement.executeUpdate();
-                AuditService.logAction("Adăugare client");
+        if (validator.validate(cl)) {
+            clienti.add(cl);
+            try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
+                String query = "INSERT INTO client (id, nume, adresa, email, telefon) VALUES (?, ?, ?, ?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setInt(1, cl.getId());
+                    statement.setString(2, cl.getNume());
+                    statement.setString(3, cl.getAdresa());
+                    statement.setString(4, cl.getEmail());
+                    statement.setString(5, cl.getTelefon());
+                    statement.executeUpdate();
+                    AuditService.logAction("Adăugare client");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Failed to add client: " + cl);
         }
     }
 
@@ -53,6 +60,7 @@ public class ClientService {
         }
         return clienti;
     }
+
     public void deleteAllClients() {
         try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
             String query = "DELETE FROM client";
@@ -64,20 +72,25 @@ public class ClientService {
             e.printStackTrace();
         }
     }
+
     public void updateClient(Client cl) {
-        try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
-            String query = "UPDATE client SET nume = ?, adresa = ?, email = ?, telefon = ? WHERE id = ?";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, cl.getNume());
-                statement.setString(2, cl.getAdresa());
-                statement.setString(3, cl.getEmail());
-                statement.setString(4, cl.getTelefon());
-                statement.setInt(5, cl.getId());
-                statement.executeUpdate();
-                AuditService.logAction("Actualizare client");
+        if (validator.validate(cl)) {
+            try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
+                String query = "UPDATE client SET nume = ?, adresa = ?, email = ?, telefon = ? WHERE id = ?";
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setString(1, cl.getNume());
+                    statement.setString(2, cl.getAdresa());
+                    statement.setString(3, cl.getEmail());
+                    statement.setString(4, cl.getTelefon());
+                    statement.setInt(5, cl.getId());
+                    statement.executeUpdate();
+                    AuditService.logAction("Actualizare client");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Failed to update client: " + cl);
         }
     }
 

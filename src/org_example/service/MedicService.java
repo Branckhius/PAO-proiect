@@ -2,6 +2,7 @@ package org_example.service;
 
 import org_example.domain.Medic;
 import org_example.database.DatabaseConfiguration;
+import org_example.validator.MedicValidator;
 
 import java.sql.*;
 import java.util.Set;
@@ -11,10 +12,13 @@ import java.util.Comparator;
 public class MedicService {
 
     private Set<Medic> medici;
+    private MedicValidator validator;
 
     public MedicService() {
         this.medici = new TreeSet<>(Comparator.comparing(Medic::getNume));
+        this.validator = new MedicValidator();
     }
+
     public void deleteAllMedici() {
         try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
             String query = "DELETE FROM medic";
@@ -26,20 +30,25 @@ public class MedicService {
             e.printStackTrace();
         }
     }
+
     public void addMed(Medic med) {
-        medici.add(med);
-        try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
-            String query = "INSERT INTO medic (id, nume, specialitate, orar) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, med.getId());
-                statement.setString(2, med.getNume());
-                statement.setString(3, med.getSpecialitate());
-                statement.setString(4, med.getOrar());
-                statement.executeUpdate();
-                AuditService.logAction("Adăugare medic");
+        if (validator.validate(med)) {
+            medici.add(med);
+            try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
+                String query = "INSERT INTO medic (id, nume, specialitate, orar) VALUES (?, ?, ?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setInt(1, med.getId());
+                    statement.setString(2, med.getNume());
+                    statement.setString(3, med.getSpecialitate());
+                    statement.setString(4, med.getOrar());
+                    statement.executeUpdate();
+                    AuditService.logAction("Adăugare medic");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Failed to add medic: " + med);
         }
     }
 
@@ -64,18 +73,22 @@ public class MedicService {
     }
 
     public void updateMedic(Medic med) {
-        try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
-            String query = "UPDATE medic SET nume = ?, specialitate = ?, orar = ? WHERE id = ?";
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, med.getNume());
-                statement.setString(2, med.getSpecialitate());
-                statement.setString(3, med.getOrar());
-                statement.setInt(4, med.getId());
-                statement.executeUpdate();
-                AuditService.logAction("Actualizare medic");
+        if (validator.validate(med)) {
+            try (Connection connection = DatabaseConfiguration.getDatabaseConnection()) {
+                String query = "UPDATE medic SET nume = ?, specialitate = ?, orar = ? WHERE id = ?";
+                try (PreparedStatement statement = connection.prepareStatement(query)) {
+                    statement.setString(1, med.getNume());
+                    statement.setString(2, med.getSpecialitate());
+                    statement.setString(3, med.getOrar());
+                    statement.setInt(4, med.getId());
+                    statement.executeUpdate();
+                    AuditService.logAction("Actualizare medic");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Failed to update medic: " + med);
         }
     }
 

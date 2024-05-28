@@ -2,9 +2,11 @@ package org_example;
 
 import org_example.domain.Client;
 import org_example.domain.Medic;
+import org_example.domain.Asistent;
 import org_example.domain.Programare;
 import org_example.service.ClientService;
 import org_example.service.MedicService;
+import org_example.service.AsistentService;
 import org_example.service.ProgramareService;
 import org_example.database.SetupDataUsingStatement;
 
@@ -19,9 +21,10 @@ public class Main {
 
         ClientService clientService = new ClientService();
         MedicService medicService = new MedicService();
+        AsistentService asistentService = new AsistentService();
         ProgramareService programareService = new ProgramareService(10);
 
-        clearTables(clientService, medicService, programareService);
+        clearTables(clientService, medicService, asistentService, programareService);
 
         clientService.addCl(new Client(1, "Clientunu", "Adresa1", "client1@example.com", "0734587890"));
         clientService.addCl(new Client(2, "Clientdoi", "Adresa2", "client2@example.com", "0787674321"));
@@ -75,6 +78,32 @@ public class Main {
             System.out.println(medic);
         }
 
+        asistentService.addAsistent(new Asistent(1, "Popescu", "Chirurgie", "Schimbul I"));
+        asistentService.addAsistent(new Asistent(2, "Ionescu", "Pediatrie", "Schimbul II"));
+
+        System.out.println("\nAsistenți existenți:");
+        Set<Asistent> asistenti = asistentService.getAllAsistenti();
+        for (Asistent asistent : asistenti) {
+            System.out.println(asistent);
+        }
+
+        Asistent updatedAsistent = new Asistent(1, "Popescu", "Chirurgie", "Schimbul II");
+        asistentService.updateAsistent(updatedAsistent);
+
+        System.out.println("\nAsistenți după actualizare:");
+        Set<Asistent> updatedAsistenti = asistentService.getAllAsistenti();
+        for (Asistent asistent : updatedAsistenti) {
+            System.out.println(asistent);
+        }
+
+        asistentService.deleteAsistent(2);
+
+        System.out.println("\nAsistenți după ștergere:");
+        Set<Asistent> remainingAsistenti = asistentService.getAllAsistenti();
+        for (Asistent asistent : remainingAsistenti) {
+            System.out.println(asistent);
+        }
+
         programareService.addProg(new Programare(1, 1, 1, new Date(), "Verificare operatie glezna /30zile"));
 
         System.out.println("\nProgramări existente:");
@@ -101,9 +130,10 @@ public class Main {
         }
     }
 
-    private static void clearTables(ClientService clientService, MedicService medicService, ProgramareService programareService) {
+    private static void clearTables(ClientService clientService, MedicService medicService, AsistentService asistentService, ProgramareService programareService) {
         clientService.deleteAllClients();
         medicService.deleteAllMedici();
+        asistentService.deleteAllAsistenti();
         programareService.deleteAllProgramari();
     }
 }

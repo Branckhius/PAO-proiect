@@ -1,7 +1,5 @@
 package org_example.database;
 
-import org_example.database.DatabaseConfiguration;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +27,15 @@ public class SetupDataUsingStatement {
             )
             """;
 
+        String createAsistentTableSql = """
+            CREATE TABLE IF NOT EXISTS asistent (
+                id int PRIMARY KEY AUTO_INCREMENT,
+                nume varchar(100),
+                sectie varchar(100),
+                schimb varchar(100)
+            )
+            """;
+
         String createProgramareTableSql = """
             CREATE TABLE IF NOT EXISTS programare (
                 id int PRIMARY KEY AUTO_INCREMENT,
@@ -47,6 +54,7 @@ public class SetupDataUsingStatement {
             Statement statement = connection.createStatement();
             statement.execute(createClientTableSql);
             statement.execute(createMedicTableSql);
+            statement.execute(createAsistentTableSql);
             statement.execute(createProgramareTableSql);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -110,6 +118,37 @@ public class SetupDataUsingStatement {
                 System.out.println("Nume: " + resultSet.getString("nume"));
                 System.out.println("Specialitate: " + resultSet.getString("specialitate"));
                 System.out.println("Orar: " + resultSet.getString("orar"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addAsistent(String nume, String sectie, String schimb) {
+        String insertAsistentSql = String.format("INSERT INTO asistent (nume, sectie, schimb) VALUES ('%s', '%s', '%s')", nume, sectie, schimb);
+        Connection connection = DatabaseConfiguration.getDatabaseConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute(insertAsistentSql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getAllAsistenti() {
+        String selectAsistentiSql = "SELECT * FROM asistent";
+        Connection connection = DatabaseConfiguration.getDatabaseConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(selectAsistentiSql);
+
+            while(resultSet.next()) {
+                System.out.println("Id: " + resultSet.getInt("id"));
+                System.out.println("Nume: " + resultSet.getString("nume"));
+                System.out.println("Sectie: " + resultSet.getString("sectie"));
+                System.out.println("Schimb: " + resultSet.getString("schimb"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
