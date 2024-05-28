@@ -1,139 +1,162 @@
 package org_example;
 
+import org_example.domain.Asistent;
 import org_example.domain.Client;
 import org_example.domain.Medic;
-import org_example.domain.Asistent;
 import org_example.domain.Programare;
+import org_example.service.AsistentService;
 import org_example.service.ClientService;
 import org_example.service.MedicService;
-import org_example.service.AsistentService;
 import org_example.service.ProgramareService;
-import org_example.database.SetupDataUsingStatement;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 public class Main {
-    public static void main(String[] args) {
-        SetupDataUsingStatement setupData = new SetupDataUsingStatement();
-        setupData.createTables();
 
+    public static void main(String[] args) throws ParseException {
+        Scanner scanner = new Scanner(System.in);
         ClientService clientService = new ClientService();
         MedicService medicService = new MedicService();
         AsistentService asistentService = new AsistentService();
-        ProgramareService programareService = new ProgramareService(10);
+        ProgramareService programareService = new ProgramareService(10); // Specify the maximum number of appointments
 
-        clearTables(clientService, medicService, asistentService, programareService);
+        int option;
+        do {
+            System.out.println("Meniu:");
+            System.out.println("1. Adaugare client");
+            System.out.println("2. Afisare clienti");
+            System.out.println("3. Stergere toti clientii");
+            System.out.println("4. Adaugare medic");
+            System.out.println("5. Afisare medici");
+            System.out.println("6. Stergere toti medicii");
+            System.out.println("7. Adaugare asistent");
+            System.out.println("8. Afisare asistenti");
+            System.out.println("9. Stergere toti asistentii");
+            System.out.println("10. Adaugare programare");
+            System.out.println("11. Afisare programari");
+            System.out.println("12. Stergere toate programarile");
+            System.out.println("13. Clear tables");
+            System.out.println("0. Iesire");
 
-        clientService.addCl(new Client(1, "Clientunu", "Adresa1", "client1@example.com", "0734587890"));
-        clientService.addCl(new Client(2, "Clientdoi", "Adresa2", "client2@example.com", "0787674321"));
+            System.out.print("Alege optiunea: ");
+            option = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
 
-        System.out.println("Clienți existenți:");
-        List<Client> clienti = clientService.getAllClients();
-        for (Client client : clienti) {
-            System.out.println(client);
-        }
+            switch (option) {
+                case 1:
+                    // Adaugare client
+                    System.out.print("Nume: ");
+                    String numeClient = scanner.nextLine();
+                    System.out.print("Adresa: ");
+                    String adresaClient = scanner.nextLine();
+                    System.out.print("Email: ");
+                    String emailClient = scanner.nextLine();
+                    System.out.print("Telefon: ");
+                    String telefonClient = scanner.nextLine();
+                    clientService.addCl(new Client(0, numeClient, adresaClient, emailClient, telefonClient));
+                    break;
+                case 2:
+                    // Afisare clienti
+                    List<Client> clients = clientService.getAllClients();
+                    for (Client client : clients) {
+                        System.out.println(client);
+                    }
+                    break;
+                case 3:
+                    // Stergere toti clientii
+                    clientService.deleteAllClients();
+                    break;
+                case 4:
+                    // Adaugare medic
+                    System.out.print("Nume: ");
+                    String numeMedic = scanner.nextLine();
+                    System.out.print("Specialitate: ");
+                    String specialitateMedic = scanner.nextLine();
+                    System.out.print("Orar: ");
+                    String orarMedic = scanner.nextLine();
+                    medicService.addMed(new Medic(0, numeMedic, specialitateMedic, orarMedic));
+                    break;
+                case 5:
+                    // Afisare medici
+                    Set<Medic> medici = medicService.getAllMedici();
+                    for (Medic medic : medici) {
+                        System.out.println(medic);
+                    }
+                    break;
+                case 6:
+                    // Stergere toti medicii
+                    medicService.deleteAllMedici();
+                    break;
+                case 7:
+                    // Adaugare asistent
+                    System.out.print("Nume: ");
+                    String numeAsistent = scanner.nextLine();
+                    System.out.print("Sectie: ");
+                    String sectieAsistent = scanner.nextLine();
+                    System.out.print("Schimb: ");
+                    String schimbAsistent = scanner.nextLine();
+                    asistentService.addAsistent(new Asistent(0, numeAsistent, sectieAsistent, schimbAsistent));
+                    break;
+                case 8:
+                    // Afisare asistenti
+                    Set<Asistent> asistenti = asistentService.getAllAsistenti();
+                    for (Asistent asistent : asistenti) {
+                        System.out.println(asistent);
+                    }
+                    break;
+                case 9:
+                    // Stergere toti asistentii
+                    asistentService.deleteAllAsistenti();
+                    break;
+                case 10:
+                    // Adaugare programare
+                    System.out.print("Id Client: ");
+                    int idClientProg = scanner.nextInt();
+                    System.out.print("Id Medic: ");
+                    int idMedicProg = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    System.out.print("Data (yyyy-MM-dd HH:mm:ss): ");
+                    String dataProgString = scanner.nextLine();
+                    System.out.print("Motiv: ");
+                    String motivProg = scanner.nextLine();
+                    Date dataProg = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dataProgString);
+                    programareService.addProg(new Programare(0, idClientProg, idMedicProg, dataProg, motivProg));
+                    break;
+                case 11:
+                    // Afisare programari
+                    List<Programare> programari = programareService.getAllProgramari();
+                    for (Programare programare : programari) {
+                        System.out.println(programare);
+                    }
+                    break;
+                case 12:
+                    // Stergere toate programarile
+                    programareService.deleteAllProgramari();
+                    break;
+                case 13:
+                    // Clear tables
+                    clearTables(clientService, medicService, programareService);
+                    break;
+                case 0:
+                    // Iesire
+                    System.out.println("La revedere!");
+                    break;
+                default:
+                    System.out.println("Optiune invalida! Te rog sa introduci o optiune valida.");
+            }
+        } while (option != 0);
 
-        Client updatedClient = new Client(1, "Clientunu", "Adresa1", "client1@example.com", "0734567999");
-        clientService.updateClient(updatedClient);
-
-        System.out.println("\nClienți după actualizare:");
-        List<Client> updatedClienti = clientService.getAllClients();
-        for (Client client : updatedClienti) {
-            System.out.println(client);
-        }
-
-        clientService.deleteClient(2);
-
-        System.out.println("\nClienți după ștergere:");
-        List<Client> remainingClienti = clientService.getAllClients();
-        for (Client client : remainingClienti) {
-            System.out.println(client);
-        }
-
-        medicService.addMed(new Medic(1, "Marin", "Specializare1", "12:00-18:00"));
-        medicService.addMed(new Medic(2, "Ana", "Specializare2", "8:00-16:00"));
-
-        System.out.println("\nMedici existenți:");
-        Set<Medic> medici = medicService.getAllMedici();
-        for (Medic medic : medici) {
-            System.out.println(medic);
-        }
-
-        Medic updatedMedic = new Medic(1, "Marin", "Specializare1", "14:00-20:00");
-        medicService.updateMedic(updatedMedic);
-
-        System.out.println("\nMedici după actualizare:");
-        Set<Medic> updatedMedici = medicService.getAllMedici();
-        for (Medic medic : updatedMedici) {
-            System.out.println(medic);
-        }
-
-        medicService.deleteMedic(2);
-
-        System.out.println("\nMedici după ștergere:");
-        Set<Medic> remainingMedici = medicService.getAllMedici();
-        for (Medic medic : remainingMedici) {
-            System.out.println(medic);
-        }
-
-        asistentService.addAsistent(new Asistent(1, "Popescu", "Chirurgie", "Schimbul I"));
-        asistentService.addAsistent(new Asistent(2, "Ionescu", "Pediatrie", "Schimbul II"));
-
-        System.out.println("\nAsistenți existenți:");
-        Set<Asistent> asistenti = asistentService.getAllAsistenti();
-        for (Asistent asistent : asistenti) {
-            System.out.println(asistent);
-        }
-
-        Asistent updatedAsistent = new Asistent(1, "Popescu", "Chirurgie", "Schimbul II");
-        asistentService.updateAsistent(updatedAsistent);
-
-        System.out.println("\nAsistenți după actualizare:");
-        Set<Asistent> updatedAsistenti = asistentService.getAllAsistenti();
-        for (Asistent asistent : updatedAsistenti) {
-            System.out.println(asistent);
-        }
-
-        asistentService.deleteAsistent(2);
-
-        System.out.println("\nAsistenți după ștergere:");
-        Set<Asistent> remainingAsistenti = asistentService.getAllAsistenti();
-        for (Asistent asistent : remainingAsistenti) {
-            System.out.println(asistent);
-        }
-
-        programareService.addProg(new Programare(1, 1, 1, new Date(), "Verificare operatie glezna /30zile"));
-
-        System.out.println("\nProgramări existente:");
-        List<Programare> programari = programareService.getAllProgramari();
-        for (Programare programare : programari) {
-            System.out.println(programare);
-        }
-
-        Programare updatedProgramare = new Programare(1, 1, 1, new Date(), "Control post-operator");
-        programareService.updateProgramare(updatedProgramare);
-
-        System.out.println("\nProgramări după actualizare:");
-        List<Programare> updatedProgramari = programareService.getAllProgramari();
-        for (Programare programare : updatedProgramari) {
-            System.out.println(programare);
-        }
-
-        programareService.deleteProgramare(1);
-
-        System.out.println("\nProgramări după ștergere:");
-        List<Programare> remainingProgramari = programareService.getAllProgramari();
-        for (Programare programare : remainingProgramari) {
-            System.out.println(programare);
-        }
+        scanner.close();
     }
 
-    private static void clearTables(ClientService clientService, MedicService medicService, AsistentService asistentService, ProgramareService programareService) {
+    private static void clearTables(ClientService clientService, MedicService medicService, ProgramareService programareService) {
         clientService.deleteAllClients();
         medicService.deleteAllMedici();
-        asistentService.deleteAllAsistenti();
         programareService.deleteAllProgramari();
     }
 }
